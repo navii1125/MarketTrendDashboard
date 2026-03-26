@@ -1,0 +1,2 @@
+# MarketTrendDashboard
+MarketTrend Analysis project 
