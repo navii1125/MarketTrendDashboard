@@ -196,6 +196,15 @@ df = pd.read_csv("ecommerce_sales_data.csv")
 
 df["Order Date"] = pd.to_datetime(df["Order Date"])
 df["Month"] = df["Order Date"].dt.to_period("M").astype(str)
+df["Days"] = (df["Order Date"] - df["Order Date"].min()).dt.days
+
+from sklearn.linear_model import LinearRegression
+
+X = df[["Days"]]
+y = df["Sales"]
+
+model = LinearRegression()
+model.fit(X, y)
 
 # ================= SIDEBAR =================
 st.sidebar.header("🔍 Filters")
@@ -278,6 +287,24 @@ with tab2:
 
     fig6 = px.bar(top_products, x="Sales", y="Product Name", orientation='h', template="plotly_white")
     st.plotly_chart(fig6, use_container_width=True)
+
+    # 🔮 Sales Prediction
+st.subheader("🔮 Sales Prediction (Next 30 Days)")
+
+import numpy as np
+
+future_days = np.arange(df["Days"].max(), df["Days"].max() + 30).reshape(-1, 1)
+predictions = model.predict(future_days)
+
+future_dates = pd.date_range(start=df["Order Date"].max(), periods=30)
+
+pred_df = pd.DataFrame({
+    "Date": future_dates,
+    "Predicted Sales": predictions
+})
+
+fig_pred = px.line(pred_df, x="Date", y="Predicted Sales")
+st.plotly_chart(fig_pred, use_container_width=True)
 
 # ================= INSIGHTS =================
 with tab3:
